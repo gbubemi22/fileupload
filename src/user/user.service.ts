@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,8 +17,8 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const newUser = this.userRepository.save(createUserDto);
-    return newUser;
+    const newUser = this.userRepository.create(createUserDto);
+    return this.userRepository.save(newUser);
   }
 
   async findAll(): Promise<User[]> {
@@ -23,6 +27,19 @@ export class UserService {
 
   findOne(id: number) {
     return this.userRepository.findOneBy({ id: id });
+  }
+  async findUserByEmail(email: string) {
+    const result = await this.userRepository.findOne({
+      where: { email: email },
+    });
+    return result;
+  }
+
+  async findUserByUsername(username: string) {
+    const result = await this.userRepository.findOne({
+      where: { username: username },
+    });
+    return result;
   }
 
   update(id: number, updateUserDto: UpdateUserDto): Promise<UpdateResult> {
